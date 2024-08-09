@@ -1,5 +1,6 @@
 ﻿using BookStore.Entities;
 using BookStore.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;
 
@@ -13,8 +14,9 @@ namespace BookStore.Controllers
     {
 
         private IBookStoreRepository _bookStoreRepository;
-        public struct BookReqBody
+        public struct BookBody
         {
+            public int book_id;
             public string title;
             public int author_id;
             public float price;
@@ -51,7 +53,7 @@ namespace BookStore.Controllers
         [HttpPost]
         public async Task<ActionResult<Book?>> CreateBook([FromBody] JsonObject json)
         {
-            BookReqBody req;
+            BookBody req;
             JsonNode? jNode;
             json.TryGetPropertyValue("title", out jNode);
             req.title = jNode.GetValue<string>();

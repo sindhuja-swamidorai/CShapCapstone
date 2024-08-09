@@ -39,7 +39,7 @@ public class BookStoreContext : DbContext
             entity.Property(e => e.AuthorName)
                 .HasMaxLength(255)
                 .IsUnicode(false)
-                .HasColumnName("author_name");
+                .HasColumnName("name");
             entity.Property(e => e.Biography)
                 .HasColumnType("text")
                 .HasColumnName("biography");

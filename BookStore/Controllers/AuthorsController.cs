@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,8 +15,9 @@ namespace BookStore.Controllers
     public class AuthorsController : ControllerBase
     {
         IBookStoreRepository _bookStoreRepository;
-        public struct AuthorReqBody
+        public struct AuthorBody
         {
+            public int author_id;
             public string name;
             public string biography;
         };
@@ -45,7 +47,7 @@ namespace BookStore.Controllers
         [HttpPost]
         public async Task<ActionResult<Author?>> CreateAuthor([FromBody] JsonObject json)
         {
-            AuthorReqBody req;
+            AuthorBody req;
             JsonNode? jNode;
             if (json.TryGetPropertyValue("name", out jNode))
             {

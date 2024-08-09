@@ -23,19 +23,19 @@ namespace BookStore.Services
         }
         public async Task<IEnumerable<Book>> GetAllBooksAsync()
         {
-            var books = await _bookStoreContext.Books.ToListAsync();
+            var books = await _bookStoreContext.Books.OrderBy(b => b.Title).ToListAsync();
             return books;
         }
 
         public async Task<IEnumerable<Author>> GetAllAuthorsAsync()
         {
-            var authors = await _bookStoreContext.Authors.ToListAsync();
+            var authors = await _bookStoreContext.Authors.OrderBy(a => a.AuthorName).ToListAsync();
             return authors;
         }
 
         public async Task<IEnumerable<Genre>> GetAllGenresAsync()
         {
-            var genres = await _bookStoreContext.Genres.ToListAsync();
+            var genres = await _bookStoreContext.Genres.OrderBy(g => g.GenreName).ToListAsync();
             return genres;
         }
 

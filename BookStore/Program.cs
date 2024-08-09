@@ -2,7 +2,19 @@ using BookStore.Controllers;
 using BookStore.DbContexts;
 using BookStore.Services;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("_myPolicy",
+            policy =>
+          {
+              policy.WithOrigins("http://localhost:4000", "http://172.31.12.119:4000" ) // URL of your React app
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+          });
+    });
 
 // Add services to the container.
 
@@ -35,7 +47,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("_myPolicy");
 
 app.UseAuthorization();
 
