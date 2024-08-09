@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.OpenApi;
 
 namespace BookStore.Entities;
 
-public partial class Book
+public class Book
 {
     public int BookId { get; set; }
 

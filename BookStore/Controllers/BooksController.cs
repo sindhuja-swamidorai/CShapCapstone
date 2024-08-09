@@ -1,6 +1,7 @@
 ﻿using BookStore.Entities;
 using BookStore.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Nodes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,6 +13,18 @@ namespace BookStore.Controllers
     {
 
         private IBookStoreRepository _bookStoreRepository;
+        public struct BookReqBody
+        {
+            public string title;
+            public int author_id;
+            public float price;
+            public DateTime publication_date;
+        }
+
+        public struct ReqBody
+        {
+            public string book_title;
+        };
 
         public BooksController(IBookStoreRepository bookStoreRepository)
         {
@@ -23,7 +36,7 @@ namespace BookStore.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetAllBooks()
         {
-            var books = await _bookStoreRepository.GetAllBooks();
+            var books = await _bookStoreRepository.GetAllBooksAsync();
             return Ok(books);
         }
 
@@ -36,8 +49,25 @@ namespace BookStore.Controllers
 
         // POST api/<BooksController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<Book?>> CreateBook([FromBody] JsonObject json)
         {
+            BookReqBody req;
+            JsonNode? jNode;
+            json.TryGetPropertyValue("title", out jNode);
+            req.title = jNode.GetValue<string>();
+
+            json.TryGetPropertyValue("price", out jNode);
+            req.price = jNode.GetValue<float>();
+
+            json.TryGetPropertyValue("publication_date", out jNode);
+            req.publication_date = jNode.GetValue<DateTime>();
+
+            json.TryGetPropertyValue("author_id", out jNode);
+            req.author_id = jNode.GetValue<int>();
+
+            var book = await _bookStoreRepository.CreateBookAsync(req.title, req.author_id, req.price, req.publication_date);
+            return Ok(book);
+
         }
 
         // PUT api/<BooksController>/5

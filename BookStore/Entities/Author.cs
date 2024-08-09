@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BookStore.Entities;
 
-public partial class Author
+public class Author
 {
     public int AuthorId { get; set; }
 
