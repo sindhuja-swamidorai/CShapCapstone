@@ -44,8 +44,8 @@ namespace BookStore.Services
             var book = await _bookStoreContext.Books.Include(b => b.Author).Include(b => b.Genre).Where(b => b.BookId == id).FirstOrDefaultAsync();
             if (book != null)
             {
-                book.AuthorName = book.Author.AuthorName;
-                book.GenreName = book.Genre.GenreName;
+                book.AuthorName = (book.Author != null) ? book.Author.AuthorName.ToString() : "";
+                book.GenreName = (book.Genre != null) ? book.Genre.GenreName.ToString() : "";
             }
             return book;
         }
@@ -53,6 +53,12 @@ namespace BookStore.Services
         public async Task<Author?> GetAuthorByIdAsync(int id)
         {
             var author = await _bookStoreContext.Authors.Where(a => a.AuthorId == id).FirstOrDefaultAsync();
+            return author;
+        }
+
+        public async Task<Author?> GetAuthorByNameAsync(string author_name)
+        {
+            var author = await _bookStoreContext.Authors.Where(a => a.AuthorName == author_name).FirstOrDefaultAsync();
             return author;
         }
 

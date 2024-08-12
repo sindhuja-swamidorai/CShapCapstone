@@ -42,7 +42,8 @@ namespace BookStore.Controllers
         // GET: books>
         [HttpGet]
         public async Task<ActionResult<JsonArray>> GetAllBooks(string? start, 
-            int? genre_id, int? author_id, string? title, bool? count, string? author_name)
+            int? genre_id, int? author_id, string? title, bool? count, string? author_name,
+            int? limit)
         {
             var books = await _bookStoreRepository.GetAllBooksAsync();
 
@@ -60,8 +61,16 @@ namespace BookStore.Controllers
             }
             if(title != null)
             {
-                books = books.Where(b => b.Title.Contains(title));
+                books = books.Where(b => b.Title.Contains(title, StringComparison.InvariantCultureIgnoreCase));
             }
+
+            if (author_name != null)
+            {
+                var authors = await _bookStoreRepository.GetAllAuthorsAsync();
+                authors = authors.Where(a => a.AuthorName.Contains(author_name, StringComparison.InvariantCultureIgnoreCase));
+                books = books.Where(b => authors.Contains(b.Author));
+            }
+
             if ((count != null) && (genre_id != null))
             {
                 JsonArray result = new JsonArray();
@@ -92,6 +101,11 @@ namespace BookStore.Controllers
                 {
                     return NotFound();
                 }
+            }
+
+            if(limit != null)
+            {
+                books = books.OrderByDescending(a => a.PublicationDate).Take(limit.GetValueOrDefault());
             }
 
             return Ok(books);

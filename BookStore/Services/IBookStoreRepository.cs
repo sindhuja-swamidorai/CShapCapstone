@@ -15,6 +15,8 @@ namespace BookStore.Services
 
         Task<Author?> GetAuthorByIdAsync(int id);
 
+        Task<Author?> GetAuthorByNameAsync(string author_name);
+
         Task<Genre?> GetGenreByIdAsync(int id);
 
         Task<Genre?> GetGenreByNameAsync(string genre_name);

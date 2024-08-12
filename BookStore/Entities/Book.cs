@@ -28,7 +28,7 @@ public class Book
     public int? GenreId { get; set; }
 
     [NotMapped]
-    [JsonPropertyName("author_name")]
+    [JsonPropertyName("name")]
     public string? AuthorName {  get; set; }
 
     [NotMapped]
