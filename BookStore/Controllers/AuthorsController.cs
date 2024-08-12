@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Newtonsoft.Json;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Newtonsoft.Json.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -55,7 +56,7 @@ namespace BookStore.Controllers
             }
             else
             {
-                req.name = "xxx";
+                return BadRequest();
             }
 
             if (json.TryGetPropertyValue("biography", out jNode))
@@ -64,30 +65,57 @@ namespace BookStore.Controllers
             }
             else
             {
-                req.biography = "yyy";
+                return BadRequest();
             }
 
-                var author = await _bookStoreRepository.CreateAuthorAsync(req.name, req.biography);
-                if (author != null)
+            var author = await _bookStoreRepository.CreateAuthorAsync(req.name, req.biography);
+            if (author != null)
+            {
+                 return Ok(author);
+            }
+            else
+            {
+                 return BadRequest();
+            }
+        }
+
+        // PUT api/<AuthorsController>/5
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateAuthor(int id, [FromBody] JsonObject json)
+        {
+            JsonNode? jNode;
+            if (json.TryGetPropertyValue("biography", out jNode))
+            {
+                string value = jNode.GetValue<string>();
+                bool result = await _bookStoreRepository.UpdateAuthorAsync(id, value);
+                if (result)
                 {
-                    return Ok(author);
+                    return Ok();
                 }
                 else
                 {
                     return BadRequest();
                 }
-        }
-
-        // PUT api/<AuthorsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
         // DELETE api/<AuthorsController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> DeleteAuthor(int id)
         {
+            bool result = await _bookStoreRepository.DeleteAuthorAsync(id);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
     }
 }

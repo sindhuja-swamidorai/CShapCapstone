@@ -2,6 +2,11 @@
 using BookStore.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using NuGet.Protocol;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -36,17 +41,68 @@ namespace BookStore.Controllers
 
         // GET: books>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetAllBooks()
+        public async Task<ActionResult<JsonArray>> GetAllBooks(string? start, 
+            int? genre_id, int? author_id, string? title, bool? count, string? author_name)
         {
             var books = await _bookStoreRepository.GetAllBooksAsync();
+
+            if (start != null)
+            {
+                books = books.Where(b => b.Title.StartsWith(start, StringComparison.InvariantCultureIgnoreCase));
+            }
+            if (genre_id != null)
+            {
+                books = books.Where(b => b.GenreId == genre_id);
+            }
+            if (author_id != null)
+            {
+                books = books.Where(b => b.AuthorId == author_id);
+            }
+            if(title != null)
+            {
+                books = books.Where(b => b.Title.Contains(title));
+            }
+            if ((count != null) && (genre_id != null))
+            {
+                JsonArray result = new JsonArray();
+                var genre = await _bookStoreRepository.GetGenreByIdAsync(genre_id.GetValueOrDefault());
+                if (genre != null)
+                {
+                    genre.Count = genre.Books.Count();
+                    result.Add(genre);
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+
+            if ((count != null) && (author_id != null))
+            {
+                JsonArray result = new JsonArray();
+                var author = await _bookStoreRepository.GetAuthorByIdAsync(author_id.GetValueOrDefault());
+                if (author != null)
+                {
+                    author.Count = author.Books.Count();
+                    result.Add(author);
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+
             return Ok(books);
         }
 
         // GET api/<BooksController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Book?>> GetBookById(int id)
         {
-            return "value";
+            var book = await _bookStoreRepository.GetBookByIdAsync(id);
+            return Ok(book);
         }
 
         // POST api/<BooksController>
@@ -56,16 +112,20 @@ namespace BookStore.Controllers
             BookBody req;
             JsonNode? jNode;
             json.TryGetPropertyValue("title", out jNode);
+            if (jNode == null) return BadRequest();
             req.title = jNode.GetValue<string>();
 
             json.TryGetPropertyValue("price", out jNode);
-            req.price = jNode.GetValue<float>();
+            if (jNode == null) return BadRequest();
+            req.price = float.Parse((jNode.GetValue<string>()));
 
             json.TryGetPropertyValue("publication_date", out jNode);
-            req.publication_date = jNode.GetValue<DateTime>();
+            if (jNode == null) return BadRequest();
+            req.publication_date = DateTime.Parse(jNode.GetValue<string>());
 
             json.TryGetPropertyValue("author_id", out jNode);
-            req.author_id = jNode.GetValue<int>();
+            if (jNode == null) return BadRequest();
+            req.author_id = int.Parse(jNode.GetValue<string>());
 
             var book = await _bookStoreRepository.CreateBookAsync(req.title, req.author_id, req.price, req.publication_date);
             return Ok(book);
@@ -74,14 +134,42 @@ namespace BookStore.Controllers
 
         // PUT api/<BooksController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult> UpdateBook(int id, [FromBody] JsonObject json)
         {
+            JsonNode? jNode;
+            if (json.TryGetPropertyValue("price", out jNode))
+            {
+                string value = jNode.GetValue<string>();
+                bool result = await _bookStoreRepository.UpdateBookAsync(id, double.Parse(value));
+                if (result)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
         // DELETE api/<BooksController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> DeleteBook(int id)
         {
+            bool result = await _bookStoreRepository.DeleteBookAsync(id);
+            //book.Price = double.Parse(value);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
     }
 }

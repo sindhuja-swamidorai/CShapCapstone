@@ -41,7 +41,12 @@ namespace BookStore.Services
 
         public async Task<Book?> GetBookByIdAsync(int id)
         {
-            var book = await _bookStoreContext.Books.Where(b => b.BookId == id).FirstOrDefaultAsync();
+            var book = await _bookStoreContext.Books.Include(b => b.Author).Include(b => b.Genre).Where(b => b.BookId == id).FirstOrDefaultAsync();
+            if (book != null)
+            {
+                book.AuthorName = book.Author.AuthorName;
+                book.GenreName = book.Genre.GenreName;
+            }
             return book;
         }
 
@@ -104,5 +109,49 @@ namespace BookStore.Services
                 return null;
             }
         }
+
+        public async Task<bool> UpdateBookAsync(int id, double price)
+        {
+            var book = await _bookStoreContext.Books.Where(b => b.BookId == id).FirstOrDefaultAsync();
+            if (book != null)
+            {
+                book.Price = price;
+                await _bookStoreContext.SaveChangesAsync();
+            }
+            return true;
+        }
+        public async Task<bool> UpdateAuthorAsync (int id, string biography)
+        {
+            var author = await _bookStoreContext.Authors.Where(a => a.AuthorId == id).FirstOrDefaultAsync();
+            if (author != null)
+            {
+                author.Biography = biography;
+                await _bookStoreContext.SaveChangesAsync();
+            }
+            return true;
+        }
+
+        public async Task<bool> DeleteBookAsync(int id)
+        {
+            var book = await _bookStoreContext.Books.Where(b => b.BookId == id).FirstOrDefaultAsync();
+            if (book != null)
+            {
+                _bookStoreContext.Remove<Book>(book);
+                await _bookStoreContext.SaveChangesAsync();
+            }
+            return true;
+        }
+
+        public async Task<bool> DeleteAuthorAsync(int id)
+        {
+            var author = await _bookStoreContext.Authors.Where(a => a.AuthorId == id).FirstOrDefaultAsync();
+            if (author != null)
+            {
+                _bookStoreContext.Remove<Author>(author);
+                await _bookStoreContext.SaveChangesAsync();
+            }
+            return true;
+        }
+
     }
 }

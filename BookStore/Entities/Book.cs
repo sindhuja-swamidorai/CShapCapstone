@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OpenApi;
@@ -25,6 +26,14 @@ public class Book
 
     [JsonPropertyName("genre_id")]
     public int? GenreId { get; set; }
+
+    [NotMapped]
+    [JsonPropertyName("author_name")]
+    public string? AuthorName {  get; set; }
+
+    [NotMapped]
+    [JsonPropertyName("genre_name")]
+    public string? GenreName { get; set; }
 
     public virtual Author? Author { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using BookStore.Entities;
+using System.Runtime.CompilerServices;
 
 namespace BookStore.Services
 {
@@ -22,6 +23,14 @@ namespace BookStore.Services
         Task<Author?> CreateAuthorAsync(string author_name, string biography);
 
         Task<Genre?> CreateGenreAsync(string genre_name);
+
+        Task<bool> UpdateBookAsync(int id, double price);
+
+        Task<bool> UpdateAuthorAsync(int id, string biography);
+
+        Task<bool> DeleteBookAsync(int id);
+
+        Task<bool> DeleteAuthorAsync(int id);
 
     }
 }
